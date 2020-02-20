@@ -164,8 +164,32 @@ Used for creating {@link PasswordEncoder} instances
 
 
 
-
 # Filter Chain
+
+## RememberMe 认证授权
+
+![](C:\Users\DELL\Desktop\xuan\note\png\RememberMe 认证授权.png)
+
+改换redis存储，则实现PersistentTokenRepository，改为redis实现，注入RememberMeConfigurer tokenRepository(
+			PersistentTokenRepository tokenRepository)
+
+
+
+## 认证授权
+
+
+
+![](C:\Users\DELL\Desktop\xuan\note\png\springSecurity认证授权.png)
+
+## 投票权限验证
+
+
+
+![](C:\Users\DELL\Desktop\xuan\note\png\SpringSecurity 权限验证.png)
+
+
+
+
 
 | Alias                        | Filter Class                                          | Namespace Element or Attribute           |
 | ---------------------------- | ----------------------------------------------------- | ---------------------------------------- |
@@ -207,12 +231,54 @@ SecurityContextHolder.getContext().setAuthentication(authResult);
  .maxSessionsPreventsLogin(true)
 
 //退出后使session失效
-
 logout().invalidateHttpSession(true)
 
 **以上设置，当用户登录后，无法在当前账户已经登录的情况下，再次登录。而退出后，用户登录总会显示失败。**
 
+根据SpringSecurity官方文档，进行的处理办法，官方文档解决办法及问题描述如下：
+
+```
+Adding the listener to web.xml causes an ApplicationEvent to be published to the Spring ApplicationContext every time a HttpSession commences or terminates. This is critical, as it allows the SessionRegistryImpl to be notified when a session ends.Without it, a user will never be able to log back in again once they have exceeded their session allowance, even if they log out of another session or it times out.
+```
+
+即注册HttpSessionEventPublisher到Listener，会为我们剔除过期的Session
+
+```java
+@Bean
+public ServletListenerRegistrationBean httpSessionEventPublisher() {
+  return new ServletListenerRegistrationBean(new HttpSessionEventPublisher());
+}
+```
+
+******************************以下方法废除************
+
 用户登录以后security 会把生成的session 放到 SessionRegistry 里面,退出成功后需要剔除此session，然而logout().invalidateHttpSession(true)可以使session失效但不会使sessionRegistry中的session失效或者剔除需要自定义方法在logout().logoutSuccessHandler中调用，删除此session
+
+```java
+@Override
+public void onLogoutSuccess(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Authentication authentication) throws IOException, ServletException {
+  System.out.println(authentication);
+  System.out.println(authentication.getName());
+  List<Object> o= sessionRegistry.getAllPrincipals();
+  //退出成功后删除当前用户session
+  for (Object principal : o) {
+    if (principal instanceof User) {
+      final User loggedUser = (User) principal;
+      if (authentication.getName().equals(loggedUser.getUsername())) {
+        List<SessionInformation> sessionsInfo = sessionRegistry.getAllSessions(principal, false);
+        if (null != sessionsInfo && sessionsInfo.size() > 0) {
+          for (SessionInformation sessionInformation : sessionsInfo) {
+            sessionInformation.expireNow();
+          }
+        }
+      }
+    }
+  }
+  httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
+  httpServletResponse.setContentType("application/json;charset=utf-8");
+  httpServletResponse.getWriter().write("退出成功，请重新登录");
+}
+```
 
 # AccessDecisionManager
 
@@ -274,6 +340,20 @@ logout().invalidateHttpSession(true)
 ​	所以，若改变加密方式，也应该同时改变SpringSecurity内部使用的PasswordEncoder实现类，保持一致。
 
 ​	而在SpringSecurity内部默认使用的是BCryptPasswordEncoder实现类(具体可查看PasswordEncoderFactories类)，若想改变，则需要注入passwordEncoder类型的Bean，改变SpringSecurity内部的passwordEncoder的实际类型(可查看InitializeUserDetailsBeanManagerConfigurer类，来具体查看如何改变)。
+
+
+
+### 自定义的UserDetailsService如何注入DaoAuthenticationProvider
+
+​	InitializeUserDetailsBeanManagerConfigurer类中会截获自定义的bean，调用DaoAuthenticationProvider的setUserDetailsService方法注入
+
+
+
+
+
+
+
+
 
 
 
