@@ -181,9 +181,7 @@ Used for creating {@link PasswordEncoder} instances
 
 ![](C:\Users\DELL\Desktop\xuan\note\png\springSecurity认证授权.png)
 
-## 投票权限验证
-
-
+## 鉴权
 
 ![](C:\Users\DELL\Desktop\xuan\note\png\SpringSecurity 权限验证.png)
 
@@ -287,14 +285,19 @@ public void onLogoutSuccess(HttpServletRequest httpServletRequest, HttpServletRe
 三种机制的不同可以通过源码看出
 
 - AffirmativeBased
+
 - ConsensusBased
+
 - UnanimousBased
 
 	## AccessDecisionVoter<S>
 
 - WebExpressionVoter
+
 - AuthenticatedVoter
+
 - RoleVoter
+
 - RoleHierarchyVoter
 
 ## 注意:关于使用WebExpressionVoter会使其他Voter失效
@@ -353,15 +356,50 @@ public void onLogoutSuccess(HttpServletRequest httpServletRequest, HttpServletRe
 
 
 
+### 实现AccessDecisionVoter类，重写Voter投票方法，实现动态路径鉴权
+
+#### Service层无法注入问题
+
+@Autowired无法注入到 自己实现的Voter类中，总显示为空指针，可能为Security先于Spring 加载，在voter方法被调用时，Service还没被加载进Spring容器
+
+解决方法：使用构造器注入
+
+**WebExpressionVoter应当先于自定义Voter，免于Login，error等路径的判断**。
+
+```java
+ @Bean
+  public AccessDecisionManager accessDecisionManager(){
+    List<AccessDecisionVoter<? extends Object>> decisionVoters
+      = Arrays.asList(
+      new WebExpressionVoter(),
+      new RoleBasedVoter(usersService)
+                      );
+    return new UnanimousBased(decisionVoters);
+  }
+```
+
+#### 鉴权使用AntPathMatcher匹配路径
+
+在RBAC中，若数据库使用user-role-url控制用户访问的每一个url，应当实现路径覆盖，即 /* 对应的权限应当能访问诸如 /user/*,/content/add等需要的权限。
+
+
+
+## 思路
+
+
+
+关于springSecurity的动态权限控制，因为会使用WebExpressFilter,可能会导致，如果权限路径，存放在Authority中，则可能自定义Voter通过，WebExpressVoter不通过 。
+
+上面是为了一次查询永久使用权限，
+
+而如果使用每次都从数据库中匹配权限，则或许可以避开上面的问题
 
 
 
 
 
-
-
-
-
+shiro对于数据库保存的Url路径，例如 ，admin: * /** ，user: post /user/  。
+进行认证授权，授予用户后，在验证权限的过程中，与request的url使用通配符进行匹配，来确定是否具有访问权限。即，约定优于配置。
 
 
 
