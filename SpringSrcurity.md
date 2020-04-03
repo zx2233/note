@@ -197,7 +197,7 @@ Used for creating {@link PasswordEncoder} instances
 
 ## RememberMe 认证授权
 
-![](C:\Users\DELL\Desktop\xuan\note\png\RememberMe 认证授权.png)
+![](C:\Users\xuan\Desktop\note\png\RememberMe 认证授权.png)
 
 改换redis存储，则实现PersistentTokenRepository，改为redis实现，注入RememberMeConfigurer tokenRepository(
 			PersistentTokenRepository tokenRepository)
@@ -206,13 +206,13 @@ Used for creating {@link PasswordEncoder} instances
 
 ## 认证授权
 
+C:\Users\xuan\Desktop\note\png
 
-
-![](C:\Users\DELL\Desktop\xuan\note\png\springSecurity认证授权.png)
+![](C:\Users\xuan\Desktop\note\png\springSecurity认证授权.png)
 
 ## 鉴权
 
-![](C:\Users\DELL\Desktop\xuan\note\png\SpringSecurity 权限验证.png)
+![](C:\Users\xuan\Desktop\note\png\SpringSecurity 权限验证.png)
 
 ### 实现AccessDecisionVoter类，重写Voter投票方法，实现动态路径鉴权
 
@@ -678,7 +678,7 @@ For example, the `authorization-uri`, `token-uri`, and `user-info-uri` do not ch
 
 **Oauth2过滤器顺序**
 
-![](C:\Users\DELL\Desktop\xuan\note\png\批注 2020-02-27 174418.png)
+![](C:\Users\xuan\Desktop\note\png\批注 2020-02-27 174418.png)
 
 OAuth2AuthorizationRequestRedirectFilter
 OAuth2LoginAuthenticationFilter
