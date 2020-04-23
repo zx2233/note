@@ -18,5 +18,3 @@ Java语言的关键字，变量修饰符，如果用**transient**声明一个实
 LIKE CONCAT('%',#{name},'%')
 ```
 
-
-
