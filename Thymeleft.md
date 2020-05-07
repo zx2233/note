@@ -2,6 +2,16 @@
 
 搭配jq的Load()函数，进行局部数据的刷新
 
+### radio选中，form表单提交
+
+th:field，会自动对radio进行选中
+
+```java
+<input name="recipientType"  th:value="1"  th:field="*{apply.recipientType}"  type="radio" value="1"/>
+```
+
+
+
 
 
 

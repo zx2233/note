@@ -18,3 +18,25 @@ Java语言的关键字，变量修饰符，如果用**transient**声明一个实
 LIKE CONCAT('%',#{name},'%')
 ```
 
+```xml
+    SELECT
+        log.* ,
+        manager.nickname
+    FROM
+        log,
+        manager
+        where log.user_id=manager.id
+    <if test="logDTO.nickname != null ">
+        and manager.nickname like "%"#{logDTO.nickname}"%"
+    </if>
+    <if test="logDTO.category != null ">
+        and log.category like "%"#{logDTO.category}"%"
+    </if>
+    <if test="logDTO.timeStart != null ">
+        and log.log_time <![CDATA[ >= ]]> #{logDTO.timeStart}
+    </if>
+    <if test="logDTO.timeEnd != null ">
+        and log.log_time <![CDATA[ <= ]]> #{logDTO.timeEnd}
+    </if>
+        ORDER BY log.log_time DESC
+```
